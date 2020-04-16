@@ -1,0 +1,87 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+ using MySql.Data.MySqlClient;
+ using Sample.Model;
+ using System;
+ using System.Collections.Generic; 
+ using System.Linq;
+ using System.Text;
+ using System.Threading.Tasks;
+ using System.Windows.Forms;
+
+namespace Sample
+{
+	class <#= this.table.Label.Text #>Controller
+	{
+		public static string showStr = "SELECT <# for (int i = 0; i < this.table.Field.Count; i++) { if (i == this.table.Field.Count - 1) {#><#= this.table.Field[i].Label.Text #>"<#}#><#else {#><#= this.table.Field[i].Label.Text #>, <#}#><#}#>
++ " FROM <#= this.table.Label.Text #>";
+		public static void Insert<#= this.table.Label.Text #>(List<string> listField)
+		{
+			try
+			{
+				Query.connection.Open();
+				string sqlExpression = "INSERT INTO <#= this.table.Label.Text #> (<#for (int i = 0; i < this.table.Field.Count; i++){#><#if (this.table.Field[i].Label.Text != "Id"){#><#if (i == this.table.Field.Count - 1){#><#=this.table.Field[i].Label.Text#>"<#}#><#else{#><#=this.table.Field[i].Label.Text#>,<#}#><#}#><#}#>
++ ") VALUES (<#for (int i = 0; i < this.table.Field.Count; i++){#><#if (this.table.Field[i].Label.Text != "Id"){#><#if (i == this.table.Field.Count - 1){#>@<#= this.table.Field[i].Label.Text#><#}#><#else{#>@<#=this.table.Field[i].Label.Text#>,<#}#><#}#><#}#>)";                       
+				MySqlCommand command = new MySqlCommand(sqlExpression, Query.connection);
+<#               for (int i = 0; i < this.table.Field.Count; i++){#>
+<#                       if (this.table.Field[i].Label.Text != "Id"){  #>
+				MySqlParameter <#=this.table.Field[i].Label.Text#>Param = new MySqlParameter("@<#=this.table.Field[i].Label.Text#>", listField[<#=i - 1#>]);
+				command.Parameters.Add(<#= this.table.Field[i].Label.Text #>Param);
+<#                    }#>
+<#                }#>
+				command.ExecuteNonQuery();
+				MessageBox.Show(" Готово! ");
+			}
+			catch(Exception ex) {  MessageBox.Show(ex.ToString()); }
+			finally {  Query.connection.Close(); }
+		}
+		public static void Update<#= this.table.Label.Text #>(List<string> listField, int id)
+		{
+			try
+			{
+				Query.connection.Open();
+				string sqlExpression = "UPDATE <#=this.table.Label.Text#> SET <#for (int i = 0; i < this.table.Field.Count; i++){#><#if (this.table.Field[i].Label.Text != "Id"){#><#if (i == this.table.Field.Count - 1){#><#=this.table.Field[i].Label.Text#> = @<#=this.table.Field[i].Label.Text#>"<#}#><#else{#><#=this.table.Field[i].Label.Text#> = @<#=this.table.Field[i].Label.Text#>,<#}#><#}#><#}#>
++ " WHERE ID = @Id";
+				MySqlCommand command = new MySqlCommand(sqlExpression, Query.connection);
+<#for (int i = 0; i < this.table.Field.Count; i++){ #>
+<#if (this.table.Field[i].Label.Text != "Id"){ #>
+				MySqlParameter <#=this.table.Field[i].Label.Text#>Param = new MySqlParameter("@<#=this.table.Field[i].Label.Text#>", listField[<#=i - 1#>]);
+				command.Parameters.Add(<#=this.table.Field[i].Label.Text#>Param);
+<#}#>
+<#else{#>
+				MySqlParameter <#=this.table.Field[i].Label.Text#>Param = new MySqlParameter("@<#=this.table.Field[i].Label.Text#>", id);
+				command.Parameters.Add(<#=this.table.Field[i].Label.Text#>Param);
+<#}#> 
+<#}#>
+				command.ExecuteNonQuery();
+				MessageBox.Show(" Готово! ");
+			}
+			catch(Exception ex) {  MessageBox.Show(ex.ToString()); }
+			finally {  Query.connection.Close(); }
+		}
+
+		public static List<string> Combo<#=this.table.Label.Text#>()
+		{
+			try
+			{
+				List<string> result = new List<string>();
+				Query.connection.Open();
+				string sqlExpression = "SELECT Id From <#=this.table.Label.Text#>";
+				MySqlCommand command = new MySqlCommand(sqlExpression, Query.connection);
+				MySqlDataReader reader = command.ExecuteReader();
+				while (reader.Read())
+				{
+					result.Add(reader.GetString(0));
+				}
+				reader.Close();
+				return result;
+			}
+			catch(Exception ex) {  MessageBox.Show(ex.ToString()); return null; }
+			finally {  Query.connection.Close(); }
+		}                   
+	}
+}

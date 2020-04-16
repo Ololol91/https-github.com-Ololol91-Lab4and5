@@ -1,0 +1,57 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Sample
+{
+	class SystemTableController 
+	{
+		public static string connStr = "server = localhost; port = 3306; database = <#= this.dataBase #>; uid = root; password =; Persist Security Info = True; SslMode = none; Allow Zero Datetime = true";
+		public static string DefinitionShowTable(string table)
+		{
+<#		foreach (Table t in this.listTable){#>
+			if (table == "<#= t.Label.Text #>")
+			{
+				return <#= t.Label.Text #>Controller.showStr;
+			}			
+<#		} #>
+			return null;
+		}
+		public static void DefinitionInsertTable(string table, List<string> listFields)
+		{
+<#		foreach (Table t in this.listTable){#>
+			if (table == "<#= t.Label.Text #>")
+			{
+				<#= t.Label.Text #>Controller.Insert<#= t.Label.Text #>(listFields);
+			}	
+<#		} #>
+		}
+		public static void DefinitionUpdateTable(string table, List<string> listFields, int id)
+		{
+<#		foreach (Table t in this.listTable) {#>
+			if (table == "<#= t.Label.Text #>")
+			{
+				<#= t.Label.Text #>Controller.Update<#= t.Label.Text #>(listFields, id);
+			}			
+<#		} #>
+		}
+		public static List<string> DefinitionComboBox(string table)
+		{
+<#		foreach (Table t in this.listTable) {#>
+			if (table == "<#= t.Label.Text #>")
+			{
+				return <#= t.Label.Text #>Controller.Combo<#= t.Label.Text #>();
+			}			
+<#		} #>
+			return null;
+		}
+	}
+}
